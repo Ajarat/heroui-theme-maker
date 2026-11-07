@@ -1,0 +1,462 @@
+/*
+ * Editor chrome. Deliberately independent of the theme being edited: fixed colors,
+ * px units and a system font, so no token you change can restyle or break the panel.
+ */
+.ts-root {
+  display: grid;
+  grid-template-columns: 340px minmax(0, 1fr);
+  height: 100vh;
+  overflow: hidden;
+}
+
+.ts-panel {
+  background: #17181b;
+  border-right: 1px solid #2c2e33;
+  color: #e6e7ea;
+  color-scheme: dark;
+  display: flex;
+  flex-direction: column;
+  font: 400 13px/18px -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  min-height: 0;
+}
+
+.ts-canvas {
+  background: var(--background);
+  overflow-y: auto;
+}
+
+.ts-probe {
+  height: 0;
+  overflow: hidden;
+  pointer-events: none;
+  position: absolute;
+  visibility: hidden;
+}
+
+.ts-header {
+  align-items: center;
+  border-bottom: 1px solid #2c2e33;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  padding: 14px 16px;
+}
+
+.ts-eyebrow {
+  color: #8d919b;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  line-height: 14px;
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.ts-title {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 20px;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.ts-mode {
+  background: #24262a;
+  border-radius: 7px;
+  display: flex;
+  flex: none;
+  padding: 2px;
+}
+
+.ts-mode button {
+  background: none;
+  border: 0;
+  border-radius: 5px;
+  color: #a7abb4;
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+  padding: 3px 10px;
+}
+
+.ts-mode button[aria-pressed="true"] {
+  background: #3b3e45;
+  color: #fff;
+}
+
+.ts-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-color: #3b3e45 transparent;
+  scrollbar-width: thin;
+}
+
+.ts-section {
+  border-bottom: 1px solid #2c2e33;
+}
+
+.ts-section summary {
+  cursor: pointer;
+  font-weight: 600;
+  padding: 11px 16px;
+  user-select: none;
+}
+
+.ts-section summary:hover {
+  background: #1e2024;
+}
+
+.ts-section-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 2px 16px 16px;
+}
+
+.ts-subheading {
+  color: #8d919b;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  line-height: 14px;
+  margin: 8px 0 8px;
+  text-transform: uppercase;
+}
+
+.ts-row {
+  align-items: center;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: 32px minmax(0, 1fr) 22px;
+  margin-bottom: 8px;
+}
+
+.ts-row-main {
+  min-width: 0;
+}
+
+.ts-swatch {
+  border-radius: 6px;
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.16);
+  cursor: pointer;
+  display: block;
+  height: 32px;
+  overflow: hidden;
+  position: relative;
+  width: 32px;
+}
+
+.ts-swatch input {
+  cursor: pointer;
+  height: 100%;
+  inset: 0;
+  opacity: 0;
+  position: absolute;
+  width: 100%;
+}
+
+.ts-label {
+  align-items: center;
+  display: flex;
+  font-size: 12px;
+  gap: 6px;
+  line-height: 16px;
+}
+
+.ts-dot {
+  background: #6ea8fe;
+  border-radius: 50%;
+  display: inline-block;
+  height: 6px;
+  width: 6px;
+}
+
+.ts-input {
+  background: #24262a;
+  border: 1px solid #33363c;
+  border-radius: 5px;
+  color: #e6e7ea;
+  font: inherit;
+  font-size: 12px;
+  line-height: 16px;
+  padding: 3px 6px;
+  width: 100%;
+}
+
+.ts-input:focus-visible,
+.ts-panel button:focus-visible,
+.ts-section summary:focus-visible,
+.ts-range:focus-visible {
+  outline: 2px solid #6ea8fe;
+  outline-offset: 1px;
+}
+
+.ts-row .ts-input {
+  background: none;
+  border-color: transparent;
+  color: #a7abb4;
+  margin: 1px 0 0 -6px;
+  width: calc(100% + 6px);
+}
+
+.ts-row .ts-input:hover,
+.ts-row .ts-input:focus {
+  background: #24262a;
+  border-color: #33363c;
+}
+
+.ts-input[aria-invalid="true"] {
+  border-color: #f87171 !important;
+}
+
+.ts-mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px;
+  text-overflow: ellipsis;
+}
+
+.ts-reset,
+.ts-reset-slot {
+  flex: none;
+  height: 22px;
+  width: 22px;
+}
+
+.ts-reset {
+  background: none;
+  border: 0;
+  border-radius: 5px;
+  color: #a7abb4;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 22px;
+  padding: 0;
+}
+
+.ts-reset:hover {
+  background: #2c2e33;
+  color: #fff;
+}
+
+.ts-slider,
+.ts-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ts-slider-head {
+  align-items: center;
+  display: flex;
+  gap: 6px;
+  min-height: 22px;
+}
+
+.ts-slider-head .ts-label {
+  flex: 1;
+}
+
+.ts-value {
+  color: #a7abb4;
+}
+
+.ts-range {
+  accent-color: #6ea8fe;
+  margin: 0;
+  width: 100%;
+}
+
+.ts-hint {
+  color: #8d919b;
+  font-size: 11px;
+  line-height: 14px;
+  margin: 0;
+}
+
+.ts-custom-font {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ts-error {
+  background: #3f1d1d;
+  color: #fecaca;
+  margin: 0;
+  padding: 10px 16px;
+}
+
+.ts-footer {
+  border-top: 1px solid #2c2e33;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 16px;
+}
+
+.ts-status {
+  color: #a7abb4;
+  font-size: 12px;
+  margin: 0;
+}
+
+.ts-status[data-kind="saved"] {
+  color: #6ee7a7;
+}
+
+.ts-status[data-kind="error"] {
+  color: #fca5a5;
+}
+
+.ts-update {
+  background: #3b82f6;
+  border: 0;
+  border-radius: 7px;
+  color: #fff;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+  padding: 8px 12px;
+}
+
+.ts-update:hover:not(:disabled) {
+  background: #5b97f8;
+}
+
+.ts-update:disabled {
+  background: #2c2e33;
+  color: #71757e;
+  cursor: not-allowed;
+}
+
+.ts-secondary {
+  display: flex;
+  justify-content: space-between;
+}
+
+.ts-secondary button {
+  background: none;
+  border: 0;
+  color: #a7abb4;
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+  padding: 2px 0;
+}
+
+.ts-secondary button:hover:not(:disabled) {
+  color: #fff;
+  text-decoration: underline;
+}
+
+.ts-secondary button:disabled {
+  color: #5c6068;
+  cursor: not-allowed;
+}
+
+/* The theme's heading font targets h1-h6 globally. These are editor labels, not content. */
+.ts-title,
+.ts-subheading,
+.ts-group-title {
+  font-family: inherit;
+}
+
+/* Lives in the themed preview, but labels the group rather than being part of it. */
+.ts-group-title {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+@media (max-width: 520px) {
+  .ts-root {
+    grid-template-columns: 1fr;
+    grid-template-rows: 55vh 1fr;
+  }
+
+  .ts-panel {
+    border-right: 0;
+    border-bottom: 1px solid #2c2e33;
+  }
+}
+
+.ts-contrast-ok {
+  color: #6ee7a7;
+  font-size: 12px;
+  margin: 0;
+}
+
+.ts-issues {
+  background: #2a1d1f;
+  border: 1px solid #5c2b2f;
+  border-radius: 7px;
+  color: #fecaca;
+  font-size: 12px;
+}
+
+.ts-issues summary {
+  cursor: pointer;
+  font-weight: 600;
+  padding: 7px 10px;
+}
+
+.ts-issues ul {
+  list-style: none;
+  margin: 0;
+  max-height: 180px;
+  overflow-y: auto;
+  padding: 0 4px 6px;
+}
+
+.ts-issues li button {
+  align-items: center;
+  background: none;
+  border: 0;
+  border-radius: 5px;
+  color: inherit;
+  cursor: pointer;
+  display: flex;
+  font: inherit;
+  gap: 8px;
+  padding: 4px 6px;
+  text-align: start;
+  width: 100%;
+}
+
+.ts-issues li button:hover {
+  background: #3a2427;
+}
+
+.ts-pair {
+  border-radius: 4px;
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.15);
+  flex: none;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 18px;
+  text-align: center;
+  width: 26px;
+}
+
+.ts-issue-label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ts-issue-meta {
+  color: #fca5a5;
+  flex: none;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px;
+}
+
+/* Marks the element a contrast issue points at. */
+.ts-flag {
+  outline: 2px dashed #f87171 !important;
+  outline-offset: 3px;
+}

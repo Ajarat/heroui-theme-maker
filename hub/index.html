@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Theme Maker</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        --bg: #f6f6f7;
+        --card: #fff;
+        --line: #e3e4e8;
+        --text: #1b1c1f;
+        --muted: #676b75;
+        --brand: #2563eb;
+        --brand-text: #fff;
+        --danger: #b91c1c;
+        --ok: #15803d;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #111214;
+          --card: #1a1b1f;
+          --line: #2c2e33;
+          --text: #e9eaed;
+          --muted: #9a9ea8;
+          --brand: #3b82f6;
+          --danger: #f87171;
+          --ok: #4ade80;
+        }
+      }
+      * { box-sizing: border-box; }
+      [hidden] { display: none !important; }
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font: 15px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+        margin: 0;
+      }
+      main { margin: 0 auto; max-width: 860px; padding: 48px 16px; }
+      h1 { font-size: 26px; letter-spacing: -0.01em; margin: 0; }
+      .lede { color: var(--muted); margin: 4px 0 28px; }
+      .library {
+        align-items: center;
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px 16px;
+        justify-content: space-between;
+        margin-bottom: 10px;
+        padding: 16px 18px;
+      }
+      .library h2 { font-size: 16px; margin: 0; }
+      .meta { color: var(--muted); font-size: 13px; }
+      .state { font-size: 13px; }
+      .state[data-state="running"] { color: var(--ok); }
+      .actions { display: flex; flex-wrap: wrap; gap: 8px; }
+      button, .link {
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        color: var(--text);
+        cursor: pointer;
+        font: inherit;
+        font-size: 14px;
+        padding: 6px 12px;
+        text-decoration: none;
+      }
+      button:hover, .link:hover { border-color: var(--muted); }
+      button:disabled { cursor: not-allowed; opacity: 0.55; }
+      .primary { background: var(--brand); border-color: var(--brand); color: var(--brand-text); }
+      form { align-items: center; display: flex; flex-wrap: wrap; gap: 8px; margin-top: 24px; }
+      form h2 { flex-basis: 100%; font-size: 14px; font-weight: 600; margin: 0; }
+      input, select {
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        color: var(--text);
+        font: inherit;
+        font-size: 14px;
+        padding: 6px 10px;
+      }
+      input { flex: 1; max-width: 280px; min-width: 180px; }
+      #message { color: var(--danger); min-height: 22px; margin: 12px 0 0; white-space: pre-wrap; }
+      #message[data-ok] { color: var(--ok); }
+      .empty { color: var(--muted); }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Theme Maker</h1>
+      <p class="lede">One Storybook per project. Each library is its own HeroUI install, and nothing crosses between them unless you copy it.</p>
+      <div id="libraries"></div>
+
+      <form id="create">
+        <h2>New library</h2>
+        <input aria-label="Library name" autocomplete="off" name="name" placeholder="project-name" required spellcheck="false" />
+        <button class="primary">Create from fresh HeroUI</button>
+      </form>
+
+      <form id="copy" hidden>
+        <h2>Copy a theme between libraries</h2>
+        <select aria-label="Copy from" name="from"></select>
+        <span class="meta">to</span>
+        <select aria-label="Copy to" name="to"></select>
+        <button>Copy theme</button>
+      </form>
+
+      <p aria-live="polite" id="message"></p>
+    </main>
+
+    <script>
+      const list = document.getElementById("libraries");
+      const message = document.getElementById("message");
+      const createForm = document.getElementById("create");
+      const copyForm = document.getElementById("copy");
+      const STUDIO_PATH = "/?path=/story/theme-studio--theme-studio";
+      let pollTimer;
+
+      const say = (text, ok) => {
+        message.textContent = text;
+        message.toggleAttribute("data-ok", Boolean(ok));
+      };
+
+      const post = async (url, body) => {
+        const response = await fetch(url, {
+          body: JSON.stringify(body),
+          headers: {"Content-Type": "application/json"},
+          method: "POST",
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error);
+        return data;
+      };
+
+      const element = (tag, props = {}, ...children) => {
+        const node = Object.assign(document.createElement(tag), props);
+        node.append(...children);
+        return node;
+      };
+
+      const STATE_LABEL = {running: "Running", starting: "Starting…", stopped: "Stopped"};
+
+      function renderLibrary(library) {
+        const url = `http://localhost:${library.port}`;
+        const summary =
+          library.overrides === 0
+            ? "stock theme"
+            : `${library.overrides} theme ${library.overrides === 1 ? "change" : "changes"}`;
+
+        const actions = element("div", {className: "actions"});
+        if (library.state === "running") {
+          actions.append(
+            element("a", {className: "link primary", href: url + STUDIO_PATH, target: "_blank", rel: "noopener", textContent: "Theme Studio"}),
+            element("a", {className: "link", href: url, target: "_blank", rel: "noopener", textContent: "Storybook"}),
+          );
+          if (library.managed) actions.append(action("Stop", "/api/stop", library.name));
+        } else if (library.state === "stopped") {
+          actions.append(action("Start", "/api/start", library.name, "primary"));
+        }
+
+        const state = element("span", {className: "state", textContent: STATE_LABEL[library.state]});
+        state.dataset.state = library.state;
+
+        return element(
+          "article",
+          {className: "library"},
+          element(
+            "div",
+            {},
+            element("h2", {textContent: library.name}),
+            element("div", {className: "meta", textContent: `HeroUI ${library.heroui} · port ${library.port} · ${summary}`}),
+            state,
+          ),
+          actions,
+        );
+      }
+
+      function action(label, url, name, className = "") {
+        const button = element("button", {className, textContent: label, type: "button"});
+        button.addEventListener("click", async () => {
+          button.disabled = true;
+          say("");
+          try {
+            await post(url, {name});
+          } catch (error) {
+            say(error.message);
+          }
+          refresh();
+        });
+        return button;
+      }
+
+      function fillSelects(libraries) {
+        const names = libraries.map((library) => library.name);
+        copyForm.hidden = names.length < 2;
+        for (const select of copyForm.querySelectorAll("select")) {
+          const current = select.value;
+          select.replaceChildren(...names.map((name) => element("option", {textContent: name, value: name})));
+          if (names.includes(current)) select.value = current;
+        }
+      }
+
+      async function refresh() {
+        clearTimeout(pollTimer);
+        try {
+          const response = await fetch("/api/libraries");
+          const libraries = await response.json();
+          list.replaceChildren(
+            ...(libraries.length
+              ? libraries.map(renderLibrary)
+              : [element("p", {className: "empty", textContent: "No libraries yet. Create the first one below."})]),
+          );
+          fillSelects(libraries);
+          pollTimer = setTimeout(refresh, libraries.some((library) => library.state === "starting") ? 1000 : 5000);
+        } catch {
+          say("Lost contact with the hub. Is `pnpm dev` still running?");
+          pollTimer = setTimeout(refresh, 5000);
+        }
+      }
+
+      createForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const name = createForm.elements.name.value.trim();
+        const button = createForm.querySelector("button");
+        button.disabled = true;
+        say(`Installing ${name}…`, true);
+        try {
+          await post("/api/libraries", {name});
+          say(`Created ${name}.`, true);
+          createForm.reset();
+        } catch (error) {
+          say(error.message);
+        }
+        button.disabled = false;
+        refresh();
+      });
+
+      copyForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const from = copyForm.elements.from.value;
+        const to = copyForm.elements.to.value;
+        if (from === to) return say("Pick two different libraries.");
+        if (!confirm(`Replace the theme of ${to} with the theme of ${from}?`)) return;
+        try {
+          await post("/api/copy-theme", {from, to});
+          say(`Copied the theme from ${from} to ${to}.`, true);
+        } catch (error) {
+          say(error.message);
+        }
+        refresh();
+      });
+
+      refresh();
+    </script>
+  </body>
+</html>

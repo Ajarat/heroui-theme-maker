@@ -1,0 +1,10 @@
+{
+  "name": "heroui-theme-maker",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node hub/server.mjs",
+    "new": "node scripts/cli.mjs new",
+    "copy": "node scripts/cli.mjs copy"
+  }
+}

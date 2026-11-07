@@ -1,0 +1,166 @@
+/*
+ * Theme tokens this library adds on top of HeroUI. Hand-maintained (not generated).
+ * The defaults below reproduce stock HeroUI exactly; the Theme Studio overrides them
+ * through theme.css.
+ */
+
+/* Second accent: bg-accent-2, text-accent-2-foreground, bg-accent-2-soft, … */
+@theme inline {
+  --color-accent-2: var(--accent-2);
+  --color-accent-2-foreground: var(--accent-2-foreground);
+  --color-accent-2-hover: var(--accent-2-hover);
+  --color-accent-2-soft: var(--accent-2-soft);
+  --color-accent-2-soft-foreground: var(--accent-2-soft-foreground);
+  --color-accent-2-soft-hover: var(--accent-2-soft-hover);
+}
+
+@layer base {
+  :root {
+    --accent-2: var(--accent);
+    --accent-2-foreground: var(--accent-foreground);
+
+    /* Per-component corners. Stock values are HeroUI's own. */
+    --button-radius: calc(var(--radius) * 3);
+    --surface-radius: min(32px, calc(var(--radius) * 3));
+    /* ⅔ of the outer surface: HeroUI's own ratio for table headers inside tables (2× vs 3× radius). */
+    --nested-surface-radius: calc(var(--surface-radius) * 2 / 3);
+  }
+
+  /* Calculated the same way HeroUI derives its accent states. */
+  :root,
+  .light,
+  [data-theme="light"],
+  .dark,
+  [data-theme="dark"] {
+    --accent-2-hover: color-mix(in oklab, var(--accent-2) 90%, var(--accent-2-foreground) 10%);
+    --accent-2-soft: color-mix(in oklab, var(--accent-2) 15%, transparent);
+    --accent-2-soft-hover: color-mix(in oklab, var(--accent-2) 20%, transparent);
+  }
+
+  /*
+   * Divider variants follow the theme's divider color, getting progressively stronger.
+   * (HeroUI mixes them from the surface instead, so they ignore --separator.)
+   */
+  :root,
+  .light,
+  [data-theme="light"],
+  .dark,
+  [data-theme="dark"] {
+    --separator-secondary: color-mix(in oklab, var(--separator) 80%, var(--surface-foreground) 20%);
+    --separator-tertiary: color-mix(in oklab, var(--separator) 65%, var(--surface-foreground) 35%);
+  }
+
+  /* Separate blocks, so the Studio can edit them per mode. */
+  :root,
+  .light,
+  [data-theme="light"] {
+    --accent-2-soft-foreground: color-mix(in oklab, var(--accent-2) 60%, var(--foreground) 40%);
+  }
+
+  .dark,
+  [data-theme="dark"] {
+    --accent-2-soft-foreground: color-mix(in oklab, var(--accent-2) 60%, var(--foreground) 40%);
+  }
+}
+
+@layer components {
+  /* <Button className="button--accent-2"> */
+  .button--accent-2 {
+    --button-bg: var(--accent-2);
+    --button-bg-hover: var(--accent-2-hover);
+    --button-bg-pressed: var(--accent-2-hover);
+    --button-fg: var(--accent-2-foreground);
+  }
+
+  /* <Chip className="chip--accent-2">, soft by default; add variant="primary" for solid */
+  .chip.chip--accent-2 {
+    --chip-bg: var(--accent-2-soft);
+    --chip-fg: var(--accent-2-soft-foreground);
+  }
+
+  .chip.chip--primary.chip--accent-2 {
+    --chip-bg: var(--accent-2);
+    --chip-fg: var(--accent-2-foreground);
+  }
+
+  /* HeroUI leaves the search input's placeholder at the browser default gray. */
+  .search-field__input::placeholder {
+    color: var(--field-placeholder);
+  }
+
+  /* Buttons. Same selectors HeroUI uses, so groups keep only their outer corners round. */
+  .button,
+  .toggle-button {
+    border-radius: var(--button-radius);
+  }
+
+  .button-group .button {
+    border-radius: 0;
+  }
+
+  .button-group--horizontal .button:first-child {
+    border-start-start-radius: var(--button-radius);
+    border-end-start-radius: var(--button-radius);
+  }
+
+  .button-group--horizontal .button:last-child {
+    border-start-end-radius: var(--button-radius);
+    border-end-end-radius: var(--button-radius);
+  }
+
+  .button-group--vertical .button:first-child {
+    border-start-start-radius: var(--button-radius);
+    border-start-end-radius: var(--button-radius);
+  }
+
+  .button-group--vertical .button:last-child {
+    border-end-start-radius: var(--button-radius);
+    border-end-end-radius: var(--button-radius);
+  }
+
+  /* Surfaces: cards, alerts, surface accordions, tables. */
+  .card,
+  .alert,
+  .accordion--surface {
+    border-radius: var(--surface-radius);
+  }
+
+  .accordion--surface .accordion__item:first-child [data-slot="accordion-trigger"] {
+    border-start-start-radius: var(--surface-radius);
+    border-start-end-radius: var(--surface-radius);
+  }
+
+  .accordion--surface
+    .accordion__item:last-child:not(:has([data-slot="accordion-trigger"][aria-expanded="true"]))
+    [data-slot="accordion-trigger"] {
+    border-end-start-radius: var(--surface-radius);
+    border-end-end-radius: var(--surface-radius);
+  }
+
+  /* HeroUI draws surface accordion dividers in 6% foreground, which ignores the divider color. */
+  .accordion--surface .accordion__item::after {
+    background-color: var(--separator);
+  }
+
+  /* Nested surfaces. HeroUI's Surface has no radius of its own; this gives it one. */
+  .surface {
+    border-radius: var(--nested-surface-radius);
+  }
+
+  .table-root--secondary
+    :is(th.table__column:first-child, [role="row"] > [role="presentation"]:first-of-type > .table__column) {
+    border-start-start-radius: var(--nested-surface-radius);
+    border-end-start-radius: var(--nested-surface-radius);
+  }
+
+  .table-root--secondary
+    :is(th.table__column:last-child, [role="row"] > [role="presentation"]:last-of-type > .table__column) {
+    border-start-end-radius: var(--nested-surface-radius);
+    border-end-end-radius: var(--nested-surface-radius);
+  }
+
+  /* HeroUI rounds tables slightly less than cards (2.5× vs 3× radius); keep that ratio. */
+  .table-root--primary {
+    border-radius: calc(var(--surface-radius) * 5 / 6);
+  }
+}

@@ -1,0 +1,10 @@
+/* Google Fonts imports must stay first: browsers ignore @import after other rules. */
+@import "./theme/fonts.css";
+
+@import "tailwindcss";
+@import "@heroui/styles";
+@import "./theme/extensions.css";
+
+/* Unlayered, so these win over HeroUI's defaults. */
+@import "./theme/theme.css";
+@import "./theme/custom.css";

@@ -1,0 +1,7 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {"name": "todoapp9000", "runtimeExecutable": "pnpm", "runtimeArgs": ["--dir", "libraries/todoapp9000", "run", "dev"], "port": 6101},
+    {"name": "hub", "runtimeExecutable": "pnpm", "runtimeArgs": ["run", "dev"], "port": 6100}
+  ]
+}
